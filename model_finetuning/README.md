@@ -40,7 +40,7 @@ pip install torch transformers peft datasets pandas matplotlib swanlab modelscop
 
 > **效果展示**：
 > 模型能够识别 System Prompt，针对“Java后端”等技术点进行深度追问。
-> ![Chat Demo](chat.jpg)
+> ![Chat Demo](chat.png)
 
 ### 3. 效果评估 (Evaluation)
 
@@ -97,4 +97,5 @@ ollama run interview_agent
 
 ---
 *Powered by Qwen3, LoRA & Ollama*
+
 
