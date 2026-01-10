@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 虚拟面试官</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; background: #f4f4f7; }
+        #chat-window { height: 400px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px; background: white; margin-bottom: 20px; }
+        .msg { margin: 10px 0; padding: 8px; border-radius: 5px; }
+        .user { background: #e3f2fd; text-align: right; }
+        .ai { background: #f1f8e9; text-align: left; }
+        #record-btn { width: 100%; padding: 15px; font-size: 18px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        #record-btn:active { background: #0056b3; }
+        .status { color: gray; font-size: 12px; text-align: center; }
+        #input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #text-input {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none; /* 禁止手动拉伸 */
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        #record-btn {
+            flex: 2; /* 录音按钮占大部分空间 */
+            background: #28a745;
+        }
+
+        #send-txt-btn {
+            flex: 1; /* 发送按钮占较小空间 */
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #send-txt-btn:hover {
+            background: #0056b3;
+        }
+
+        #send-txt-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .mode-selector { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; background: #eee; padding: 10px; border-radius: 8px; }
+        /* 开关基础样式 */
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #28a745; }
+        input:checked + .slider:before { transform: translateX(26px); }
+    </style>
+</head>
+<body>
+<h2>💻 AI 虚拟面试官 (计算机专业)</h2>
+<div class="mode-selector">
+    <span>当前模式：</span>
+    <label class="switch">
+        <input type="checkbox" id="mode-toggle" checked>
+        <span class="slider round"></span>
+    </label>
+    <span id="mode-label">微调模型 (chat2)</span>
+</div>
+<div id="chat-window"></div>
+<p class="status" id="status">准备就绪</p>
+<!--<button id="record-btn">按住说话</button>-->
+<div id="input-area">
+    <textarea id="text-input" placeholder="输入你的回答... (Shift + Enter 换行)"></textarea>
+    <div class="control-row">
+        <button id="record-btn">按住说话</button>
+        <button id="send-txt-btn">发送文字</button>
+    </div>
+</div>
+
+
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let isCancelled = false;
+    const btn = document.getElementById('record-btn');
+    const statusText = document.getElementById('status');
+    const chatWindow = document.getElementById('chat-window');
+
+    // 获取新增的元素
+    const textInput = document.getElementById('text-input');
+    const sendTxtBtn = document.getElementById('send-txt-btn');
+
+    const modeToggle = document.getElementById('mode-toggle');
+    const modeLabel = document.getElementById('mode-label');
+
+    // --- 状态变量 ---
+    let currentSessionId = generateSessionId(); // 初始化第一个 SessionID
+
+    // 工具函数：生成唯一的 Session ID
+    function generateSessionId() {
+        return "session_" + Math.random().toString(36).substring(2, 10) + "_" + Date.now();
+    }
+
+    // --- 核心切换逻辑 ---
+    modeToggle.onchange = () => {
+        // 1. 更新 UI 标签
+        const isFinetuned = modeToggle.checked;
+        modeLabel.innerText = isFinetuned ? "微调模型 (chat2)" : "原始模型 (chat1)";
+
+        // 2. 清空聊天界面
+        chatWindow.innerHTML = "";
+        addMsg('ai', `正在切换至${isFinetuned ? '微调' : '原始'}模型并创建新会话...`);
+
+        // 3. 生成全新的 Session ID (彻底告别旧记忆)
+        currentSessionId = generateSessionId();
+        console.log(">>> 会话已重置，新 SessionID:", currentSessionId);
+
+        // 4. 自动触发新模型的开场白 (START)
+        sendToBackend(null, "START");
+    };
+
+    // --- 文字输入逻辑 ---
+
+    // 点击按钮发送
+    sendTxtBtn.onclick = () => {
+        handleTextSend();
+    };
+
+    // 按下回车键发送 (Enter 发送，Shift + Enter 换行)
+    textInput.onkeydown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // 阻止默认的回车换行
+            handleTextSend();
+        }
+    };
+
+    async function handleTextSend() {
+        const text = textInput.value.trim();
+        if (!text) return;
+
+        // 禁用输入，防止重复发送
+        textInput.value = "";
+        textInput.disabled = true;
+        sendTxtBtn.disabled = true;
+
+        document.getElementById('status').innerText = "面试官正在思考...";
+
+        // 调用之前写好的后端发送函数
+        // 注意：第一个参数传 null，因为没有录音文件
+        await sendToBackend(null, text);
+
+        // 恢复输入
+        textInput.disabled = false;
+        sendTxtBtn.disabled = false;
+        textInput.focus();
+    }
+
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+        mediaRecorder.onstop = async () => {
+            if (isCancelled) {
+                console.log(">>> 录音已取消");
+                audioChunks = [];
+                return;
+            }
+            const audioBlob = new Blob(audioChunks, { type: 'audio/m4a' });
+            if (audioBlob.size > 0) sendToBackend(audioBlob);
+            audioChunks = [];
+        };
+    });
+
+    // 1. 按下按钮：仅由按钮触发
+    btn.onmousedown = (e) => {
+        e.preventDefault(); // 防止某些浏览器下的文字选中干扰
+        isCancelled = false;
+        audioChunks = [];
+        if (mediaRecorder.state === "inactive") {
+            mediaRecorder.start();
+            btn.style.background = "#28a745";
+            btn.innerText = "正在录音... (移出按钮取消)";
+            statusText.innerText = "录音中...";
+        }
+    };
+
+    // 2. 移出按钮：仅做状态标记和 UI 提示
+    btn.onmouseleave = () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            isCancelled = true;
+            btn.style.background = "#dc3545";
+            btn.innerText = "松开手指，取消发送";
+            statusText.innerText = "⚠ 释放即取消";
+        }
+    };
+
+    // 3. 移回按钮：恢复状态
+    btn.onmouseenter = () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            isCancelled = false;
+            btn.style.background = "#28a745";
+            btn.innerText = "正在录音... (移出按钮取消)";
+            statusText.innerText = "继续录音...";
+        }
+    };
+
+    // 4. 【关键修复】在全局 window 上监听松手
+    window.onmouseup = () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+
+            // 恢复 UI 样式
+            btn.style.background = "#007bff";
+            btn.innerText = "按住说话";
+
+            if (isCancelled) {
+                statusText.innerText = "已取消发送";
+            } else {
+                statusText.innerText = "发送中，请稍候...";
+            }
+        }
+    };
+
+    const sessionId = "session_" + Math.random().toString(36).substring(7);
+
+    // --- 修改原有的 sendToBackend 函数以支持界面展示 ---
+    async function sendToBackend(blob, manualText = null) {
+        const formData = new FormData();
+
+
+        if (blob) {
+            formData.append('file', blob, 'recording.m4a');
+        }
+        if (manualText) {
+            formData.append('text', manualText);
+        }
+
+        // 👈 动态获取当前的模式和 SessionId
+        const selectedMode = modeToggle.checked ? "finetuned" : "base";
+        console.log(">>> [前端检查] 准备发送的模式为:", selectedMode); // 👈 添加这一行
+        formData.append('mode', selectedMode);
+        formData.append('sessionId', currentSessionId);
+
+        try {
+            // 展示用户发送的文字（非初始化指令时）
+            if (manualText && manualText !== "START") {
+                addMsg('user', manualText);
+            }
+
+            const response = await fetch('/api/interview', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            // 展示语音转写结果
+            if (blob) {
+                addMsg('user', data.userText);
+            }
+
+            // 展示 AI 回复
+            addMsg('ai', data.aiText);
+
+            // 播放语音
+            const audio = new Audio("data:audio/mpeg;base64," + data.audio);
+            audio.play();
+
+            document.getElementById('status').innerText = "准备就绪";
+        } catch (error) {
+            console.error("通信失败:", error);
+            document.getElementById('status').innerText = "服务连接异常";
+        }
+    }
+
+    function addMsg(role, text) {
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        div.innerText = text;
+        chatWindow.appendChild(div);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // 页面加载时自动执行
+    window.onload = () => {
+        addMsg('ai', "正在初始化面试官，请稍候...");
+        // 明确调用 sendToBackend，传入 START
+        sendToBackend(null, "START");
+    };
+</script>
+</body>
+</html>
