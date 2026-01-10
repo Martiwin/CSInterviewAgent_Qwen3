@@ -21,7 +21,7 @@
 
 本项目在 Linux 服务器 (NVIDIA RTX 3090, 48GB VRAM) 上开发。核心依赖如下：
 
-pip install torch transformers peft datasets pandas matplotlib swanlab modelscope rouge nltk
+`pip install torch transformers peft datasets pandas matplotlib swanlab modelscope rouge nltk`
 
 ## 🚀 工作流 (Workflow)
 
@@ -97,5 +97,6 @@ ollama run interview_agent
 
 ---
 *Powered by Qwen3, LoRA & Ollama*
+
 
 
