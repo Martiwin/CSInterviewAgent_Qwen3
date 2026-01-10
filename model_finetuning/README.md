@@ -4,7 +4,7 @@
 
 本项目基于 **Qwen3-8B** 基座模型，使用 **LoRA (Low-Rank Adaptation)** 技术进行指令微调 (SFT)，旨在构建一个**风格严谨、善于追问底层原理、并能主动结束面试进行点评**的专业面试官智能体。
 
-## 📂 文件结构说明
+## 文件结构说明
 
 | 文件名 | 类型 | 说明 |
 | :--- | :--- | :--- |
@@ -17,13 +17,13 @@
 | `comparison_chart.png` | 结果图表 | 微调前后客观指标对比柱状图。 |
 | `chat.jpg` | 演示截图 | 实际对话效果截图。 |
 
-## 🛠️ 环境准备
+## 环境准备
 
 本项目在 Linux 服务器 (NVIDIA RTX 3090, 48GB VRAM) 上开发。核心依赖如下：
 
 `pip install torch transformers peft datasets pandas matplotlib swanlab modelscope rouge nltk`
 
-## 🚀 工作流 (Workflow)
+## 工作流 (Workflow)
 
 ### 1. 模型微调 (Training)
 
@@ -60,7 +60,7 @@
 * **输出目录**: `../qwen3_train/qwen3_interview_merged`
 * 此步骤消除了推理时的 Adapter 加载延迟，为 GGUF 转换奠定基础。
 
-## 📦 模型量化与部署 (Deployment)
+## 模型量化与部署 (Deployment)
 
 本项目最终采用 **GGUF** 格式配合 **Ollama** 进行低资源推理部署，实现了从 16GB (FP16) 到 ~5GB (Int4) 的轻量化落地。
 
@@ -89,11 +89,12 @@ PARAMETER top_p 0.9
 `ollama create interview_agent -f Modelfile`  
 `ollama run interview_agent`  
 
-## 📝 核心设定 (System Prompt)
+## 核心设定 (System Prompt)
 
 模型通过以下 System Prompt 实现了角色固化，严防幻觉与风格漂移：
 
 > "你是一位专业的计算机专业面试官，风格严谨，喜欢追问底层原理。请根据候选人的回答进行追问或点评。面试中对话不超过10轮，完成面试时面试官主动结束并给出打分和点评。"
+
 
 
 
