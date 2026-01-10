@@ -1,0 +1,8 @@
+/target/
+.idea/
+*.iml
+*.gguf
+*.mp3
+*.m4a
+/tts_cache/
+.DS_Store

@@ -1,0 +1,21 @@
+# 1. 指定本地 GGUF 文件的路径 (请确保路径正确，建议用绝对路径)
+FROM "./qwen3_interview_q4_k_m.gguf"
+
+# 2. 设置 ChatML 模板 (Qwen 系列标准模板)
+# 这一步非常重要，否则 Ollama 可能无法正确识别 <|im_start|> 等特殊 token
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+# 3. 固化 System Prompt (训练时使用的那个)
+# 这样你在使用时不需要每次都重复输入这句设定
+SYSTEM """你是一位专业的计算机专业面试官，风格严谨，喜欢追问底层原理。请根据候选人的回答进行追问或点评。面试中对话不超过10轮，完成面试时面试官主动结束并给出打分和点评。"""
+
+# 4. 设置生成参数 (参考你训练/Chat脚本中的参数)
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
