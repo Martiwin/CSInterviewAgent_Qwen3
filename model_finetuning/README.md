@@ -1,4 +1,4 @@
-# 🤖 CS Interviewer Agent - Qwen3-8B Finetuning
+# CS Interviewer Agent - Qwen3-8B Finetuning
 
 本目录包含了**计算机模拟面试官智能体**的核心微调代码与工程化脚本。
 
@@ -94,6 +94,7 @@ PARAMETER top_p 0.9
 模型通过以下 System Prompt 实现了角色固化，严防幻觉与风格漂移：
 
 > "你是一位专业的计算机专业面试官，风格严谨，喜欢追问底层原理。请根据候选人的回答进行追问或点评。面试中对话不超过10轮，完成面试时面试官主动结束并给出打分和点评。"
+
 
 
 
