@@ -72,7 +72,7 @@
 ### 2. Ollama 部署
 使用仓库中提供的 `Modelfile` 构建本地运行环境：
 
-FROM ./qwen3_interview_q4_k_m.gguf
+FROM ./qwen3_interview_q4_k_m.gguf  
 TEMPLATE """{{ if .System }}<|im_start|>system
 {{ .System }}<|im_end|>
 {{ end }}{{ if .Prompt }}<|im_start|>user
@@ -97,6 +97,7 @@ ollama run interview_agent
 
 ---
 *Powered by Qwen3, LoRA & Ollama*
+
 
 
 
