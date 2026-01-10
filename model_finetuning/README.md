@@ -73,21 +73,21 @@
 使用仓库中提供的 `Modelfile` 构建本地运行环境：
 
 FROM ./qwen3_interview_q4_k_m.gguf  
-TEMPLATE """{{ if .System }}<|im_start|>system
-{{ .System }}<|im_end|>
-{{ end }}{{ if .Prompt }}<|im_start|>user
-{{ .Prompt }}<|im_end|>
-{{ end }}<|im_start|>assistant
-"""
-SYSTEM """你是一位专业的计算机专业面试官，风格严谨，喜欢追问底层原理。请根据候选人的回答进行追问或点评。面试中对话不超过10轮，完成面试时面试官主动结束并给出打分和点评。"""
-PARAMETER stop "<|im_start|>"
-PARAMETER stop "<|im_end|>"
-PARAMETER temperature 0.7
-PARAMETER top_p 0.9
-
-**运行命令**:
-ollama create interview_agent -f Modelfile
-ollama run interview_agent
+TEMPLATE """{{ if .System }}<|im_start|>system  
+{{ .System }}<|im_end|>  
+{{ end }}{{ if .Prompt }}<|im_start|>user  
+{{ .Prompt }}<|im_end|>  
+{{ end }}<|im_start|>assistant  
+"""  
+SYSTEM """你是一位专业的计算机专业面试官，风格严谨，喜欢追问底层原理。请根据候选人的回答进行追问或点评。面试中对话不超过10轮，完成面试时面试官主动结束并给出打分和点评。"""  
+PARAMETER stop "<|im_start|>"  
+PARAMETER stop "<|im_end|>"  
+PARAMETER temperature 0.7  
+PARAMETER top_p 0.9  
+  
+**运行命令**:  
+ollama create interview_agent -f Modelfile  
+ollama run interview_agent  
 
 ## 📝 核心设定 (System Prompt)
 
@@ -97,6 +97,7 @@ ollama run interview_agent
 
 ---
 *Powered by Qwen3, LoRA & Ollama*
+
 
 
 
