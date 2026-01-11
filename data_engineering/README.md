@@ -30,6 +30,7 @@ python -c "import openai; import langchain; print('Environment setup successful.
 ## 2. 数据处理流程
 ### 步骤 A：原始数据清洗
 原始数据来源于0voice开源数据https://github.com/0voice/interview_internal_reference
+
 将原始 Markdown 面试题文件放置在 `0voice/ALL` 目录（或脚本中配置的路径），运行清洗脚本：
 
 ```bash
@@ -117,4 +118,5 @@ data_engineering/
 ├── rag_demo.py                      # [脚本] RAG 向量库构建与检索演示
 └── README.md                        # 本说明文档
 ```
+
 
