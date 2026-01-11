@@ -1,0 +1,14 @@
+# API Client (SiliconFlow)
+openai>=2.14.0
+
+# LangChain Ecosystem (RAG Framework)
+langchain>=1.2.0
+langchain-core>=1.2.5
+langchain-community>=0.4.1
+langchain-openai>=1.1.6
+
+# Vector Database (Local RAG)
+chromadb>=0.5.20
+
+# Utilities
+tqdm>=4.67.1
