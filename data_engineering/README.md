@@ -116,7 +116,9 @@ data_engineering/
 ├── generate_kg.py                   # [脚本] 执行知识图谱三元组提取
 ├── preprocess.py                    # [脚本] 执行原始Markdown数据清洗
 ├── rag_demo.py                      # [脚本] RAG 向量库构建与检索演示
+├── requirements.txt                 # 依赖项
 └── README.md                        # 本说明文档
 ```
+
 
 
