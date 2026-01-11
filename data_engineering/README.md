@@ -15,6 +15,7 @@
 ```bash
 conda create -n data_eng python=3.10
 conda activate data_eng
+```
 
 ### b. 安装依赖
 
@@ -22,6 +23,7 @@ conda activate data_eng
 pip install -r requirements.txt
 # 验证安装 (确保已安装 OpenAI SDK 和 LangChain 相关组件)
 python -c "import openai; import langchain; print('Environment setup successful.')"
+```
 
 **注意**：本项目依赖 SiliconFlow (硅基流动) 的 API 服务。请在运行脚本前，确保 generate_data.py, generate_kg.py 和 rag_demo.py 文件中的 API_KEY 已替换为您自己的密钥。
 
@@ -32,6 +34,7 @@ python -c "import openai; import langchain; print('Environment setup successful.
 ```bash
 python preprocess.py
 ```
+
 * **输入**：原始 Markdown 文件。
 * **输出**：`cleaned_data/cleaned_data.json` (结构化的 Q&A 列表)。
 * **说明**：脚本使用正则+状态机算法提取题目与答案，去除无关字符。
@@ -42,6 +45,7 @@ python preprocess.py
 ```bash
 python generate_data.py
 ```
+
 * **输入**：`cleaned_data/cleaned_data.json`
 * **输出**：`finetune_data/interview_finetune_data.json`
 * **说明**：此过程调用 LLM API，耗时较长（约 8 小时），生成的 JSON 包含 Expert (高手) 和 Struggle (菜鸟) 两种剧本。
@@ -52,6 +56,7 @@ python generate_data.py
 ```bash
 python generate_kg.py
 ```
+
 * **输入**：`cleaned_data/cleaned_data.json`
 * **输出**：`kg_data/knowledge_graph.json`
 * **说明**：包含黑名单过滤机制与自环检测，以确保图谱质量。
@@ -62,6 +67,7 @@ python generate_kg.py
 ```bash
 python rag_demo.py
 ```
+
 * **输入**：`cleaned_data/cleaned_data.json`
 * **输出**：`my_vector_db/` 目录 (包含 .bin 和 .sqlite3 文件)。
 * **功能**：脚本运行后会构建数据库（如不存在），并执行一次简单的关键词检索测试以验证环境。
@@ -110,4 +116,3 @@ data_engineering/
 ├── rag_demo.py                      # [脚本] RAG 向量库构建与检索演示
 └── README.md                        # 本说明文档
 ```
-
