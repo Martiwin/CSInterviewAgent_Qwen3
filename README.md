@@ -30,12 +30,12 @@ CSInterviewAgent_Qwen3/
 │
 ├── data_engineering/                  # 数据工程模块
 │   ├── cleaned_data/
-│   │   └── cleaned_data.json          # (5.1节) 清洗后的结构化问答数据
+│   │   └── cleaned_data.json          # 清洗后的结构化问答数据
 │   ├── finetune_data/
-│   │   └── interview_finetune_data.json # (5.2节) 生成的双剧本SFT数据
+│   │   └── interview_finetune_data.json # 生成的双剧本SFT数据
 │   ├── kg_data/
-│   │   └── knowledge_graph.json       # (5.4节) 提取的三元组知识图谱
-│   ├── my_vector_db/                  # (5.3节) RAG向量数据库目录
+│   │   └── knowledge_graph.json       # 提取的三元组知识图谱
+│   ├── my_vector_db/                  # RAG向量数据库目录
 │   │   ├── e5dd9e.../                 # (UUID目录) HNSW 索引二进制文件
 │   │   │   ├── data_level0.bin        # 底层向量数据
 │   │   │   ├── header.bin             # 索引头配置
@@ -46,6 +46,7 @@ CSInterviewAgent_Qwen3/
 │   ├── generate_kg.py                 # 执行知识图谱三元组提取
 │   ├── preprocess.py                  # 执行原始Markdown数据清洗
 │   ├── rag_demo.py                    # RAG 向量检索演示脚本
+│   ├── requirements.txt               # 依赖项
 │   └── README.md                      # 环境配置与运行说明
 │
 ├── model_finetuning/                  # 模型微调代码
